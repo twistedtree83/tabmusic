@@ -19,6 +19,13 @@ test.describe('the build', () => {
     expect(html).not.toMatch(/["'](?:\.?\/)?assets\//);
   });
 
+  test('carries its reverb as arithmetic rather than as an audio file', () => {
+    const html = dist();
+    expect(html).not.toMatch(/\bfetch\s*\(|XMLHttpRequest|decodeAudioData/);
+    expect(html).not.toMatch(/\.(?:wav|mp3|ogg|flac|aac|m4a)\b/i);
+    expect(html).toContain('OfflineAudioContext');
+  });
+
   test('reaches the network for fonts and nothing else', () => {
     const html = dist();
     const hosts = [...html.matchAll(/https?:\/\/([^/"'\s]+)/g)].map((m) => m[1]);

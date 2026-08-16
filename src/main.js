@@ -1,6 +1,8 @@
 import './styles.css';
 import { renderGate } from './gate.js';
+import { startEngine } from './engine.js';
 import { onFrame } from './frame.js';
+import { exposeHook } from './hook.js';
 import { joinChoir } from './presence.js';
 import { LISTENER } from './roster.js';
 import { midiToHz, normalisePosition, quantise, roleOctave, ROLE_ROOTS } from './theory.js';
@@ -33,6 +35,10 @@ function describe(roster, selfId, here) {
 }
 
 renderGate(document.body, () => {
+  // Built first and synchronously: the context and its resume() have to happen
+  // inside the gesture that asked for them, or the autoplay policy suspends it.
+  const engine = startEngine();
+
   const dump = document.createElement('pre');
   dump.className = 'roster-dump';
   document.body.append(dump);
@@ -71,6 +77,15 @@ renderGate(document.body, () => {
     if (retune()) choir.setPitch(midi ? midiToHz(midi) : 0);
     dump.textContent = describe(roster, selfId, { t, degree: degree(), midi });
   }
+
+  exposeHook(() => ({
+    ctxState: engine.ctx.state,
+    impulseSeconds: engine.impulseSeconds,
+    voiceCount: 0,
+    role: roster.find((seat) => seat.id === selfId)?.role ?? '',
+    hz: midi ? midiToHz(midi) : 0,
+    voices: roster.length,
+  }));
 
   onFrame(() => {
     if (Math.abs(window.screenX - lastX) <= MOVE_PX) return;
