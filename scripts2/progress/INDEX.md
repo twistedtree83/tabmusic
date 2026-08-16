@@ -10,7 +10,7 @@ check after: **T-03** (peer layer), **T-07** (audio), **T-10** (canvas and typog
 **T-16** (edge cases and README). None of them block — see `scripts2/TUI_PROMPT.md`.
 
 - [x] **T-02** #2 — Walking skeleton: build, verify gate, entry gate screen, CI (no deps)
-- [ ] **T-03** #3 — Presence: deterministic roster over BroadcastChannel (needs T-02) — *stage 1*
+- [x] **T-03** #3 — Presence: deterministic roster over BroadcastChannel (needs T-02) — *stage 1*
 - [ ] **T-04** #4 — Pitch mapping: window position to a note in the role's octave (needs T-03)
 - [ ] **T-05** #5 — Audio engine: lazy context, procedural reverb, bus, analyser (needs T-02)
 - [ ] **T-06** #6 — Voice: oscillators, vibrato, envelope, glide, dispose (needs T-04, T-05)
