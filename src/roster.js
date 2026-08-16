@@ -1,5 +1,5 @@
 /**
- * @typedef {{ id: string, joinedAt: number }} Member
+ * @typedef {{ id: string, joinedAt: number, hz?: number }} Member
  * @typedef {Member & { rank: number, role: string }} Seat
  */
 

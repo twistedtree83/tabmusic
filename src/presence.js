@@ -8,7 +8,7 @@ const PRUNE_MS = 3000;
 
 /**
  * @typedef {import('./roster.js').Seat} Seat
- * @typedef {{ id: string, joinedAt: number, seen: number }} Peer
+ * @typedef {{ id: string, joinedAt: number, hz: number, seen: number }} Peer
  */
 
 const newId = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
@@ -23,16 +23,18 @@ const newId = () => Math.random().toString(36).slice(2, 10) + Date.now().toStrin
 export function joinChoir(onRoster) {
   const id = newId();
   const joinedAt = Date.now();
+  let hz = 0;
   /** @type {Map<string, Peer>} */
   const peers = new Map();
   const channel = new BroadcastChannel(CHANNEL);
 
   const publish = () => {
-    const members = [{ id, joinedAt }, ...[...peers.values()].map((p) => ({ id: p.id, joinedAt: p.joinedAt }))];
-    onRoster(assignRoles(sortRoster(members)), id);
+    const mine = { id, joinedAt, hz };
+    const theirs = [...peers.values()].map((p) => ({ id: p.id, joinedAt: p.joinedAt, hz: p.hz }));
+    onRoster(assignRoles(sortRoster([mine, ...theirs])), id);
   };
 
-  const beat = () => channel.postMessage({ type: 'hb', id, joinedAt });
+  const beat = () => channel.postMessage({ type: 'hb', id, joinedAt, hz });
   const farewell = () => channel.postMessage({ type: 'bye', id });
 
   channel.onmessage = ({ data }) => {
@@ -44,15 +46,20 @@ export function joinChoir(onRoster) {
     }
 
     if (data.type !== 'hb') return;
-    const stranger = !peers.has(data.id);
-    peers.set(data.id, { id: data.id, joinedAt: data.joinedAt, seen: performance.now() });
+    const known = peers.get(data.id);
+    const next = data.hz ?? 0;
+    peers.set(data.id, {
+      id: data.id,
+      joinedAt: data.joinedAt,
+      hz: next,
+      seen: performance.now(),
+    });
+
     // Answer a stranger straight away so it learns the whole chord without
     // waiting out a heartbeat. This is an announcement, not a negotiation —
     // nobody is told what their role is, only that we exist.
-    if (stranger) {
-      beat();
-      publish();
-    }
+    if (!known) beat();
+    if (!known || known.hz !== next) publish();
   };
 
   const timer = setInterval(() => {
@@ -68,10 +75,28 @@ export function joinChoir(onRoster) {
   addEventListener('pagehide', farewell);
 
   beat();
-  publish();
+  // Deferred by one microtask so the caller's `const choir = joinChoir(...)`
+  // has finished binding before the first roster lands. Publishing inline puts
+  // the callback inside the temporal dead zone of the very handle it needs to
+  // call setPitch on.
+  queueMicrotask(publish);
 
   return {
     id,
+
+    /**
+     * Tell the other windows what this one is singing. Publishing from here is
+     * re-entrant by one level — it calls back into onRoster, which will find
+     * the pitch already settled and not call setPitch again.
+     * @param {number} next
+     */
+    setPitch(next) {
+      if (next === hz) return;
+      hz = next;
+      beat();
+      publish();
+    },
+
     dispose() {
       farewell();
       clearInterval(timer);

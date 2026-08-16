@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { expect, test } from '@playwright/test';
+import { expect, test } from './fixtures.js';
 
 // Runs after `vite build` in the verify chain, so dist/ is on disk by now.
 const dist = () => readFileSync('dist/index.html', 'utf8');

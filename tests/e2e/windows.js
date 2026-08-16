@@ -1,10 +1,11 @@
 /**
  * @typedef {import('@playwright/test').BrowserContext} BrowserContext
  * @typedef {import('@playwright/test').Page} Page
- * @typedef {{ rank: number, role: string, joinedAt: number, id: string, self: boolean }} Row
+ * @typedef {{ rank: number, role: string, hz: number, joinedAt: number, id: string, self: boolean }} Row
  */
 
-const ROW = /^#(\d+)\s+(\S+)\s+joined=(\d+)\s+id=(\S+?)(\s+self)?$/gm;
+const ROW = /^#(\d+)\s+(\S+)\s+(\S+)Hz\s+joined=(\d+)\s+id=(\S+?)(\s+self)?$/gm;
+const HERE = /^position t=([\d.]+)\s+degree=(-?\d+)\s+midi=(\S+)\s+(\S+)/m;
 
 /**
  * Open n windows on the piece, all in the test's own browser context.
@@ -44,7 +45,7 @@ export async function openVoices(context, n) {
 /** @param {Page} page */
 export async function lendVoice(page) {
   await page.getByRole('button', { name: 'Lend a voice' }).click();
-  await page.locator('.roster-dump').waitFor();
+  await page.locator('.roster-dump').waitFor({ timeout: 5000 });
 }
 
 /**
@@ -57,9 +58,10 @@ export async function readRoster(page) {
   return [...text.matchAll(ROW)].map((m) => ({
     rank: Number(m[1]),
     role: m[2],
-    joinedAt: Number(m[3]),
-    id: m[4],
-    self: Boolean(m[5]),
+    hz: m[3] === '—' ? 0 : Number(m[3]),
+    joinedAt: Number(m[4]),
+    id: m[5],
+    self: Boolean(m[6]),
   }));
 }
 
@@ -78,4 +80,21 @@ export async function selfId(page) {
 export async function ownRole(page) {
   const row = (await readRoster(page)).find((r) => r.self);
   return row?.role;
+}
+
+/**
+ * What this window says about its own position and pitch.
+ * @param {Page} page
+ * @returns {Promise<{ t: number, degree: number, midi: number, hz: number }>}
+ */
+export async function readPosition(page) {
+  const text = await page.locator('.roster-dump').innerText();
+  const m = text.match(HERE);
+  if (!m) throw new Error(`no position line in dump:\n${text}`);
+  return {
+    t: Number(m[1]),
+    degree: Number(m[2]),
+    midi: m[3] === '—' ? 0 : Number(m[3]),
+    hz: m[4] === '—' ? 0 : Number(m[4]),
+  };
 }

@@ -2,6 +2,8 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const presence = readFileSync('src/presence.js', 'utf8');
+const main = readFileSync('src/main.js', 'utf8');
+const frame = readFileSync('src/frame.js', 'utf8');
 
 // These guard architectural rules that no behavioural test can see failing:
 // each one is a bug that ships silently and only shows up as a voice that goes
@@ -26,5 +28,29 @@ describe('presence discipline', () => {
   it('speaks only two kinds of message, so there is nothing to negotiate', () => {
     const kinds = [...presence.matchAll(/type: '([a-z]+)'/g)].map((m) => m[1]);
     expect(new Set(kinds)).toEqual(new Set(['hb', 'bye']));
+  });
+});
+
+describe('frame discipline', () => {
+  it('keeps the only animation frame loop in frame.js', () => {
+    expect(frame).toContain('requestAnimationFrame');
+    for (const [name, source] of [
+      ['main.js', main],
+      ['presence.js', presence],
+    ]) {
+      expect(source, `${name} must subscribe to the loop, not start one`).not.toContain(
+        'requestAnimationFrame',
+      );
+    }
+  });
+
+  it('names the move threshold once instead of inlining it', () => {
+    expect(main).toMatch(/const MOVE_PX = 4/);
+    expect(main.match(/\bMOVE_PX\b/g)).toHaveLength(2);
+  });
+
+  it('polls screenX rather than waiting for an event that does not exist', () => {
+    expect(main).toContain('window.screenX');
+    expect(main).not.toMatch(/addEventListener\(\s*['"](?:move|resize)['"]/);
   });
 });
