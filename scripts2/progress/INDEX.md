@@ -13,7 +13,7 @@ check after: **T-03** (peer layer), **T-07** (audio), **T-10** (canvas and typog
 - [x] **T-03** #3 — Presence: deterministic roster over BroadcastChannel (needs T-02) — *stage 1*
 - [x] **T-04** #4 — Pitch mapping: window position to a note in the role's octave (needs T-03)
 - [x] **T-05** #5 — Audio engine: lazy context, procedural reverb, bus, analyser (needs T-02)
-- [ ] **T-06** #6 — Voice: oscillators, vibrato, envelope, glide, dispose (needs T-04, T-05)
+- [~] **T-06** #6 — Voice: oscillators, vibrato, envelope, glide, dispose (needs T-04, T-05) — **parked on branch `t-06-voice`**, line budget
 - [ ] **T-07** #7 — The chord: roster drives voices, re-voicing, listener silence (needs T-03, T-06) — *stage 2*
 - [ ] **T-08** #8 — Stage canvas: the local waveform (needs T-07)
 - [ ] **T-09** #9 — Stage canvas: sibling rules, drift, and departing ghosts (needs T-08)
