@@ -1,0 +1,185 @@
+{
+  "name": "Tab Choir",
+  "repoUrl": "https://github.com/twistedtree83/tabmusic",
+  "branchName": "main",
+  "prdIssue": 1,
+  "verifyCommand": "npm run verify",
+  "bibles": [
+    "CONTEXT.md",
+    "docs/PRD.md",
+    "design/Tab Choir.dc.html"
+  ],
+  "tasks": [
+    {
+      "id": "T-02",
+      "issue": 2,
+      "title": "Walking skeleton: build, verify gate, entry gate screen, CI",
+      "depends": [],
+      "importance": 1,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-03",
+      "issue": 3,
+      "title": "Presence: deterministic roster over BroadcastChannel",
+      "depends": [
+        "T-02"
+      ],
+      "importance": 2,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-04",
+      "issue": 4,
+      "title": "Pitch mapping: window position to a note in the role's octave",
+      "depends": [
+        "T-03"
+      ],
+      "importance": 3,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-05",
+      "issue": 5,
+      "title": "Audio engine: lazy context, procedural reverb, bus, analyser",
+      "depends": [
+        "T-02"
+      ],
+      "importance": 4,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-06",
+      "issue": 6,
+      "title": "Voice: oscillators, vibrato, envelope, glide, dispose",
+      "depends": [
+        "T-04",
+        "T-05"
+      ],
+      "importance": 5,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-07",
+      "issue": 7,
+      "title": "The chord: roster drives voices, re-voicing, listener silence",
+      "depends": [
+        "T-03",
+        "T-06"
+      ],
+      "importance": 6,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-08",
+      "issue": 8,
+      "title": "Stage canvas: the local waveform",
+      "depends": [
+        "T-07"
+      ],
+      "importance": 7,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-09",
+      "issue": 9,
+      "title": "Stage canvas: sibling rules, drift, and departing ghosts",
+      "depends": [
+        "T-08"
+      ],
+      "importance": 8,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-10",
+      "issue": 10,
+      "title": "Overlay typography: title, role, frequency, voice count",
+      "depends": [
+        "T-08"
+      ],
+      "importance": 9,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-13",
+      "issue": 13,
+      "title": "Narrow screen: the honest explanation",
+      "depends": [
+        "T-02"
+      ],
+      "importance": 10,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-11",
+      "issue": 11,
+      "title": "The hint: a one-way copy state machine",
+      "depends": [
+        "T-10"
+      ],
+      "importance": 11,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-12",
+      "issue": 12,
+      "title": "Listener state, stated plainly",
+      "depends": [
+        "T-07",
+        "T-10"
+      ],
+      "importance": 12,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-15",
+      "issue": 15,
+      "title": "Backgrounded window: pause rendering, keep the heartbeat",
+      "depends": [
+        "T-03",
+        "T-08"
+      ],
+      "importance": 13,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-14",
+      "issue": 14,
+      "title": "Reduced motion",
+      "depends": [
+        "T-09"
+      ],
+      "importance": 14,
+      "afk": true,
+      "passes": false
+    },
+    {
+      "id": "T-16",
+      "issue": 16,
+      "title": "README, single-file deploy, and the budget sign-off",
+      "depends": [
+        "T-11",
+        "T-12",
+        "T-13",
+        "T-14",
+        "T-15"
+      ],
+      "importance": 15,
+      "afk": true,
+      "passes": false
+    }
+  ]
+}
