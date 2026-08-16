@@ -126,6 +126,16 @@ body {
   color: rgba(245, 245, 244, 0.3);
 }
 
+/* Scaffolding. The stage replaces this at T-08. */
+.roster-dump {
+  margin: 0;
+  padding: 6vh 6vw;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 2;
+  color: rgba(245, 245, 244, 0.7);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .gate {
     animation: none;
