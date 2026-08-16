@@ -11,7 +11,7 @@ check after: **T-03** (peer layer), **T-07** (audio), **T-10** (canvas and typog
 
 - [x] **T-02** #2 — Walking skeleton: build, verify gate, entry gate screen, CI (no deps)
 - [x] **T-03** #3 — Presence: deterministic roster over BroadcastChannel (needs T-02) — *stage 1*
-- [ ] **T-04** #4 — Pitch mapping: window position to a note in the role's octave (needs T-03)
+- [x] **T-04** #4 — Pitch mapping: window position to a note in the role's octave (needs T-03)
 - [ ] **T-05** #5 — Audio engine: lazy context, procedural reverb, bus, analyser (needs T-02)
 - [ ] **T-06** #6 — Voice: oscillators, vibrato, envelope, glide, dispose (needs T-04, T-05)
 - [ ] **T-07** #7 — The chord: roster drives voices, re-voicing, listener silence (needs T-03, T-06) — *stage 2*
