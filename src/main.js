@@ -3,6 +3,7 @@ import { renderGate } from './gate.js';
 import { startEngine } from './engine.js';
 import { onFrame } from './frame.js';
 import { exposeHook } from './hook.js';
+import { isNarrow, renderNarrow } from './narrow.js';
 import { joinChoir } from './presence.js';
 import { LISTENER } from './roster.js';
 import { midiToHz, normalisePosition, quantise, roleOctave, ROLE_ROOTS } from './theory.js';
@@ -34,7 +35,8 @@ function describe(roster, selfId, here) {
   ].join('\n');
 }
 
-renderGate(document.body, () => {
+if (isNarrow()) renderNarrow(document.body);
+else renderGate(document.body, () => {
   // Built first and synchronously: the context and its resume() have to happen
   // inside the gesture that asked for them, or the autoplay policy suspends it.
   const engine = startEngine();
