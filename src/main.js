@@ -6,6 +6,7 @@ import { exposeHook } from './hook.js';
 import { joinChoir } from './presence.js';
 import { LISTENER } from './roster.js';
 import { midiToHz, normalisePosition, quantise, roleOctave, ROLE_ROOTS } from './theory.js';
+import { Voice, oscillatorCount, voiceCount } from './voice.js';
 
 // There is no window-move event, so screenX is polled. Only a move worth
 // hearing goes on the channel, which keeps it quiet while a window is dragged.
@@ -47,6 +48,8 @@ renderGate(document.body, () => {
   let roster = [];
   let selfId = '';
   let midi = 0;
+  /** @type {Voice | null} */
+  let voice = null;
   // Seeded before the first roster lands, so this window's opening note is the
   // one its position actually asks for rather than degree zero for a frame.
   let lastX = window.screenX;
@@ -75,13 +78,24 @@ renderGate(document.body, () => {
 
   function update() {
     if (retune()) choir.setPitch(midi ? midiToHz(midi) : 0);
+
+    if (midi && !voice) voice = new Voice(engine, midiToHz(midi));
+    else if (midi && voice) voice.glideTo(midiToHz(midi));
+    else if (!midi && voice) {
+      voice.dispose();
+      voice = null;
+    }
+
     dump.textContent = describe(roster, selfId, { t, degree: degree(), midi });
   }
 
   exposeHook(() => ({
     ctxState: engine.ctx.state,
     impulseSeconds: engine.impulseSeconds,
-    voiceCount: 0,
+    voiceCount: voiceCount(),
+    oscillatorCount: oscillatorCount(),
+    level: voice ? voice.level : 0,
+    soundingHz: voice ? voice.soundingHz : 0,
     role: roster.find((seat) => seat.id === selfId)?.role ?? '',
     hz: midi ? midiToHz(midi) : 0,
     voices: roster.length,

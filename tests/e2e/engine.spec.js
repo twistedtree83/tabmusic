@@ -26,10 +26,12 @@ test.describe('the audio engine', () => {
     expect((await hook(page)).impulseSeconds).toBeCloseTo(3.5, 1);
   });
 
-  test('makes no sound until a voice exists', async ({ context }) => {
-    const [page] = await openVoices(context, 1);
-    await expect.poll(async () => (await hook(page)).ctxState, SETTLE).toBe('running');
-    expect((await hook(page)).voiceCount).toBe(0);
+  test('is silent in a window that has no voice to give', async ({ context }) => {
+    const pages = await openVoices(context, 6);
+    // The sixth window is a listener: the room is running, nothing sings into it.
+    await expect.poll(async () => (await hook(pages[5])).ctxState, SETTLE).toBe('running');
+    await expect.poll(async () => (await hook(pages[5])).impulseSeconds > 0, SETTLE).toBe(true);
+    expect((await hook(pages[5])).voiceCount).toBe(0);
   });
 
   test('reports the roster it is part of', async ({ context }) => {
@@ -54,7 +56,7 @@ test.describe('the audio engine', () => {
     });
 
     const after = await hook(page);
-    expect(after.voiceCount).toBe(0);
+    expect(after.voiceCount).toBe(1);
     expect(after.ctxState).toBe('running');
   });
 });
