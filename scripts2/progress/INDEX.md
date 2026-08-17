@@ -15,7 +15,7 @@ check after: **T-03** (peer layer), **T-07** (audio), **T-10** (canvas and typog
 - [x] **T-05** #5 — Audio engine: lazy context, procedural reverb, bus, analyser (needs T-02)
 - [x] **T-06** #6 — Voice: oscillators, vibrato, envelope, glide, dispose (needs T-04, T-05)
 - [x] **T-07** #7 — The chord: roster drives voices, re-voicing, listener silence (needs T-03, T-06) — *stage 2*
-- [ ] **T-08** #8 — Stage canvas: the local waveform (needs T-07)
+- [x] **T-08** #8 — Stage canvas: the local waveform (needs T-07)
 - [ ] **T-09** #9 — Stage canvas: sibling rules, drift, and departing ghosts (needs T-08)
 - [ ] **T-10** #10 — Overlay typography: title, role, frequency, voice count (needs T-08) — *stage 3*
 - [x] **T-13** #13 — Narrow screen: the honest explanation (needs T-02)

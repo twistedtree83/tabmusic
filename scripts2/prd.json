@@ -85,7 +85,7 @@
       ],
       "importance": 7,
       "afk": true,
-      "passes": false
+      "passes": true
     },
     {
       "id": "T-09",
