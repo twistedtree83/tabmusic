@@ -87,3 +87,24 @@ describe('audio param discipline', () => {
     expect(voice).toContain('breath.connect(breathDepth).connect(env.gain)');
   });
 });
+
+describe('stage discipline', () => {
+  const stage = readFileSync('src/stage.js', 'utf8');
+
+  it('names the drift and the ghost lifetime once each', () => {
+    expect(stage).toMatch(/const DRIFT = 0\.08/);
+    expect(stage.match(/\bDRIFT\b/g)).toHaveLength(2);
+    expect(stage).toMatch(/const GHOST_MS = 2000/);
+    expect(stage.match(/\bGHOST_MS\b/g)).toHaveLength(2);
+  });
+
+  it('draws siblings in bone at the opacity the design asks for', () => {
+    expect(stage).toMatch(/const SIBLING_ALPHA = 0\.22/);
+    expect(stage).toContain("const BONE = '#f5f5f4'");
+  });
+
+  it('resizes from a ResizeObserver rather than a window event', () => {
+    expect(stage).toContain('new ResizeObserver');
+    expect(stage).not.toMatch(/addEventListener\(\s*['"]resize['"]/);
+  });
+});

@@ -1,26 +1,53 @@
 import { onFrame } from './frame.js';
+import { midiToHz } from './theory.js';
 
 const INK = '#171715';
 const AMBER = '#b8873f';
+const BONE = '#f5f5f4';
 const STROKE = 1.5;
 const POINTS = 160;
 const REACH = 0.34;
 const BREATH_MS = 9000;
 
+const SIBLING_ALPHA = 0.22;
+const DRIFT = 0.08;
+const GHOST_MS = 2000;
+// The full range the chord can occupy: bass root up to an octave above descant.
+const LOW = Math.log2(midiToHz(38));
+const HIGH = Math.log2(midiToHz(83));
+
 /**
- * The stage: this window's own voice, drawn from the analyser as a single
- * tapered stroke. A horizontal line at rest, deforming with what it hears.
+ * Where a sibling's line sits: high pitch high on screen, on a log scale so an
+ * octave is always the same distance.
+ * @param {number} hz
+ */
+function rowFor(hz) {
+  const at = Math.min(1, Math.max(0, (Math.log2(hz) - LOW) / (HIGH - LOW)));
+  return 0.9 - at * 0.8;
+}
+
+/**
+ * @typedef {{ id: string, hz: number }} Sibling
+ * @typedef {{ y: number, target: number, left: number }} Rule
+ */
+
+/**
+ * The stage: this window's own voice as a tapered stroke, and one faint rule
+ * for every other voice in the chord.
  *
  * @param {HTMLElement} root
  * @param {AnalyserNode} analyser
+ * @param {() => Sibling[]} siblings
  */
-export function renderStage(root, analyser) {
+export function renderStage(root, analyser, siblings) {
   const canvas = document.createElement('canvas');
   canvas.className = 'stage';
   root.append(canvas);
 
   const paint = /** @type {CanvasRenderingContext2D} */ (canvas.getContext('2d'));
   const samples = new Uint8Array(analyser.fftSize);
+  /** @type {Map<string, Rule>} */
+  const rules = new Map();
   let width = 0;
   let height = 0;
 
@@ -39,11 +66,52 @@ export function renderStage(root, analyser) {
   new ResizeObserver(resize).observe(canvas);
   resize();
 
+  /** @param {number} now */
+  function drawSiblings(now) {
+    const present = new Set();
+    for (const sibling of siblings()) {
+      if (!sibling.hz) continue;
+      present.add(sibling.id);
+      const target = rowFor(sibling.hz);
+      const rule = rules.get(sibling.id);
+      if (rule) {
+        rule.target = target;
+        rule.left = 0;
+      } else {
+        rules.set(sibling.id, { y: target, target, left: 0 });
+      }
+    }
+
+    paint.strokeStyle = BONE;
+    for (const [id, rule] of rules) {
+      if (!present.has(id) && !rule.left) rule.left = now;
+      const fading = rule.left ? (now - rule.left) / GHOST_MS : 0;
+      if (fading >= 1) {
+        rules.delete(id);
+        continue;
+      }
+
+      // Lerped rather than moved, so a sibling drifts to its new pitch.
+      rule.y += (rule.target - rule.y) * DRIFT;
+
+      const remaining = 1 - fading;
+      paint.globalAlpha = SIBLING_ALPHA * remaining;
+      paint.lineWidth = STROKE * remaining;
+      paint.beginPath();
+      paint.moveTo(0, rule.y * height);
+      paint.lineTo(width, rule.y * height);
+      paint.stroke();
+    }
+  }
+
   onFrame((now) => {
     analyser.getByteTimeDomainData(samples);
 
+    paint.globalAlpha = 1;
     paint.fillStyle = INK;
     paint.fillRect(0, 0, width, height);
+
+    drawSiblings(now);
 
     const middle = height / 2;
     const reach = height * REACH;

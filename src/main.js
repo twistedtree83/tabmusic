@@ -20,8 +20,6 @@ else renderGate(document.body, () => {
   // inside the gesture that asked for them, or the autoplay policy suspends it.
   const engine = startEngine();
 
-  renderStage(document.body, engine.analyser);
-
   /** @type {import('./roster.js').Seat[]} */
   let roster = [];
   let selfId = '';
@@ -32,6 +30,12 @@ else renderGate(document.body, () => {
   // one its position actually asks for rather than degree zero for a frame.
   let lastX = window.screenX;
   let t = normalisePosition(lastX, window.innerWidth, screen.width);
+
+  renderStage(document.body, engine.analyser, () =>
+    roster
+      .filter((seat) => seat.id !== selfId && seat.role !== LISTENER && seat.hz > 0)
+      .map((seat) => ({ id: seat.id, hz: seat.hz })),
+  );
 
   const choir = joinChoir((next, id) => {
     roster = next;
