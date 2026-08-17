@@ -1,4 +1,5 @@
 import { onFrame } from './frame.js';
+import { reducedMotion } from './motion.js';
 import { midiToHz } from './theory.js';
 
 const INK = '#171715';
@@ -84,15 +85,16 @@ export function renderStage(root, analyser, siblings) {
 
     paint.strokeStyle = BONE;
     for (const [id, rule] of rules) {
+      const still = reducedMotion();
       if (!present.has(id) && !rule.left) rule.left = now;
-      const fading = rule.left ? (now - rule.left) / GHOST_MS : 0;
+      const fading = rule.left ? (still ? 1 : (now - rule.left) / GHOST_MS) : 0;
       if (fading >= 1) {
         rules.delete(id);
         continue;
       }
 
       // Lerped rather than moved, so a sibling drifts to its new pitch.
-      rule.y += (rule.target - rule.y) * DRIFT;
+      rule.y += (rule.target - rule.y) * (still ? 1 : DRIFT);
 
       const remaining = 1 - fading;
       paint.globalAlpha = SIBLING_ALPHA * remaining;
@@ -128,7 +130,8 @@ export function renderStage(root, analyser, siblings) {
       else paint.moveTo(x, y);
     }
 
-    paint.globalAlpha = 0.5 + 0.45 * (0.5 + 0.5 * Math.sin((now / BREATH_MS) * Math.PI * 2));
+    const breath = reducedMotion() ? 1 : 0.5 + 0.5 * Math.sin((now / BREATH_MS) * Math.PI * 2);
+    paint.globalAlpha = 0.5 + 0.45 * breath;
     paint.strokeStyle = AMBER;
     paint.lineWidth = STROKE;
     paint.lineCap = 'round';

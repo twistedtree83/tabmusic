@@ -178,7 +178,8 @@ body {
     animation: none;
   }
 
-  .join {
+  .join,
+  .hint {
     transition: none;
   }
 }

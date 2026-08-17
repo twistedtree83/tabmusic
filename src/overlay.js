@@ -5,6 +5,8 @@ const LISTENING =
 const FADE_MS = 1600;
 const LINGER_MS = 9000;
 
+import { reducedMotion } from './motion.js';
+
 const MARKUP = `
   <p class="mark">Tab Choir</p>
   <div class="readout">
@@ -60,10 +62,13 @@ export function renderOverlay(root) {
     }
     // Out, then in — the line is replaced rather than swapped under the reader.
     hint.style.opacity = '0';
-    setTimeout(() => {
-      hint.textContent = line;
-      hint.style.opacity = show;
-    }, FADE_MS);
+    setTimeout(
+      () => {
+        hint.textContent = line;
+        hint.style.opacity = show;
+      },
+      reducedMotion() ? 0 : FADE_MS,
+    );
   }
 
   return (state) => {
