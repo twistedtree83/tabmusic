@@ -3,6 +3,8 @@ import {
   ROLE_ROOTS,
   SCALE_PCS,
   avoidTritone,
+  chordPitch,
+  hzToMidi,
   midiToHz,
   normalisePosition,
   quantise,
@@ -110,6 +112,14 @@ describe('midiToHz', () => {
   it('doubles across an octave', () => {
     expect(midiToHz(62)).toBeCloseTo(midiToHz(50) * 2, 9);
   });
+
+  it('round-trips through hzToMidi for every note in the piece', () => {
+    for (const role of roles) {
+      for (const midi of roleOctave(ROLE_ROOTS[role])) {
+        expect(hzToMidi(midiToHz(midi))).toBe(midi);
+      }
+    }
+  });
 });
 
 describe('avoidTritone', () => {
@@ -159,6 +169,57 @@ describe('avoidTritone', () => {
     for (const a of every) {
       for (const b of every) {
         for (const note of avoidTritone([a, b])) expect(SCALE_PCS).toContain(pc(note));
+      }
+    }
+  });
+});
+
+describe('chordPitch', () => {
+  const F3 = 53;
+  const B3 = 59;
+  const hz = (/** @type {number} */ midi) => midiToHz(midi);
+
+  it('is just the quantised note when this window sings alone', () => {
+    expect(chordPitch(0.5, 'tenor', [])).toBe(quantise(0.5, 'tenor'));
+  });
+
+  it('is just the quantised note when three or more voices are sounding', () => {
+    const crowd = [hz(F3), hz(B3), hz(45)];
+    expect(chordPitch(0.5, 'tenor', crowd)).toBe(quantise(0.5, 'tenor'));
+  });
+
+  it('leaves a consonant duet alone', () => {
+    const mine = quantise(0.5, 'tenor');
+    expect(chordPitch(0.5, 'tenor', [hz(mine - 7)])).toBe(mine);
+  });
+
+  it('lifts this window when it is the upper voice of a tritone', () => {
+    // Find a position where tenor lands on B3, a tritone above F3.
+    const degrees = roleOctave(ROLE_ROOTS.tenor);
+    const b = degrees.findIndex((n) => n === B3);
+    expect(b).toBeGreaterThan(-1);
+
+    const t = (b + 0.5) / degrees.length;
+    expect(quantise(t, 'tenor')).toBe(B3);
+    expect(chordPitch(t, 'tenor', [hz(F3)])).toBe(60);
+  });
+
+  it('leaves this window alone when it is the lower voice of a tritone', () => {
+    const degrees = roleOctave(ROLE_ROOTS.tenor);
+    const f = degrees.findIndex((n) => n === F3);
+    const t = (f + 0.5) / degrees.length;
+    expect(quantise(t, 'tenor')).toBe(F3);
+    expect(chordPitch(t, 'tenor', [hz(B3)])).toBe(F3);
+  });
+
+  it('agrees with itself from both sides — the duet is never left a tritone', () => {
+    const degrees = roleOctave(ROLE_ROOTS.tenor);
+    for (let i = 0; i < degrees.length; i += 1) {
+      const t = (i + 0.5) / degrees.length;
+      for (const other of roleOctave(ROLE_ROOTS.alto)) {
+        const mine = chordPitch(t, 'tenor', [hz(other)]);
+        const theirs = avoidTritone([quantise(t, 'tenor'), other])[1];
+        expect(Math.abs(mine - theirs) % 12).not.toBe(6);
       }
     }
   });

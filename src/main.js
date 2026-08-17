@@ -6,7 +6,7 @@ import { exposeHook } from './hook.js';
 import { isNarrow, renderNarrow } from './narrow.js';
 import { joinChoir } from './presence.js';
 import { LISTENER } from './roster.js';
-import { midiToHz, normalisePosition, quantise, roleOctave, ROLE_ROOTS } from './theory.js';
+import { chordPitch, midiToHz, normalisePosition, roleOctave, ROLE_ROOTS } from './theory.js';
 import { Voice, oscillatorCount, voiceCount } from './voice.js';
 
 // There is no window-move event, so screenX is polled. Only a move worth
@@ -72,7 +72,11 @@ else renderGate(document.body, () => {
 
   function retune() {
     const me = roster.find((seat) => seat.id === selfId);
-    const next = me && me.role !== LISTENER ? quantise(t, me.role) : 0;
+    const others = roster
+      .filter((seat) => seat.id !== selfId && seat.role !== LISTENER && seat.hz > 0)
+      .map((seat) => seat.hz);
+
+    const next = me && me.role !== LISTENER ? chordPitch(t, me.role, others) : 0;
     if (next === midi) return false;
     midi = next;
     return true;

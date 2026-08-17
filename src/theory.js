@@ -54,6 +54,9 @@ export function quantise(t, role) {
 /** @param {number} midi */
 export const midiToHz = (midi) => 440 * 2 ** ((midi - 69) / 12);
 
+/** @param {number} hz */
+export const hzToMidi = (hz) => Math.round(69 + 12 * Math.log2(hz / 440));
+
 /**
  * The one harmonic special case in the piece. Six semitones apart, modulo the
  * octave, is the only interval this scale can produce that genuinely clashes,
@@ -63,6 +66,24 @@ export const midiToHz = (midi) => 440 * 2 ** ((midi - 69) / 12);
  * @param {number[]} midis
  * @returns {number[]}
  */
+/**
+ * The note this window should sing: its position quantised into its role's
+ * octave, then lifted if it and the only other voice would sit a tritone apart.
+ *
+ * Every window runs this against the same pair, so both sides agree on which
+ * one moves without saying anything to each other.
+ *
+ * @param {number} t
+ * @param {string} role
+ * @param {number[]} otherHz frequencies of every other voice that is sounding
+ * @returns {number}
+ */
+export function chordPitch(t, role, otherHz) {
+  const mine = quantise(t, role);
+  if (otherHz.length !== 1) return mine;
+  return avoidTritone([mine, hzToMidi(otherHz[0])])[0];
+}
+
 export function avoidTritone(midis) {
   if (midis.length !== 2) return midis;
 
