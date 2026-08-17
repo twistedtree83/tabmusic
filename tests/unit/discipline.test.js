@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 const presence = readFileSync('src/presence.js', 'utf8');
 const main = readFileSync('src/main.js', 'utf8');
 const frame = readFileSync('src/frame.js', 'utf8');
+const voice = readFileSync('src/voice.js', 'utf8');
 
 // These guard architectural rules that no behavioural test can see failing:
 // each one is a bug that ships silently and only shows up as a voice that goes
@@ -52,5 +53,37 @@ describe('frame discipline', () => {
   it('polls screenX rather than waiting for an event that does not exist', () => {
     expect(main).toContain('window.screenX');
     expect(main).not.toMatch(/addEventListener\(\s*['"](?:move|resize)['"]/);
+  });
+});
+
+describe('audio param discipline', () => {
+  // The rule is "no .value = after the node has started". In voice.js every
+  // source is started at the end of the constructor, so textual order is a
+  // faithful proxy: anything after the first start() runs on a live graph.
+  // engine.js is exempt by construction — it starts nothing that keeps playing.
+  it('never jumps a parameter on a running voice', () => {
+    const firstStart = voice.indexOf('.start()');
+    expect(firstStart).toBeGreaterThan(-1);
+
+    const afterStart = voice.slice(firstStart);
+    const jumps = [...afterStart.matchAll(/\.value\s*=/g)].map((m) => m[0]);
+    expect(jumps, 'ramp it with setTargetAtTime or a ramp, never assign').toEqual([]);
+  });
+
+  it('ramps out and glides with the durations the piece is written around', () => {
+    expect(voice).toMatch(/const ATTACK_S = 1\.5/);
+    expect(voice).toMatch(/const RELEASE_S = 2\.0/);
+    expect(voice).toMatch(/const GLIDE_S = 0\.25/);
+    expect(voice.match(/\bGLIDE_S\b/g)).toHaveLength(2);
+  });
+
+  it('stops its sources only after the release has run', () => {
+    expect(voice).toMatch(/setTimeout\([\s\S]{0,400}?RELEASE_S \* 1000\)/);
+  });
+
+  it('carries a vibrato and a breath, on detune and on the envelope', () => {
+    expect(voice).toContain('vibratoDepth.connect(body.detune)');
+    expect(voice).toContain('vibratoDepth.connect(air.detune)');
+    expect(voice).toContain('breath.connect(breathDepth).connect(env.gain)');
   });
 });

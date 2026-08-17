@@ -89,10 +89,16 @@ When you reach it (or hit the optional `count` cap), summarize:
   the answer is a ramp, every time.
 
 - **The line budget is in the gate.** Source JavaScript under `src/`, excluding tests, must stay
-  under 650 lines. It will pass trivially for the first several tasks and get tight around T-09
-  to T-14. When it does, the fix is consolidation — not deleting tests, not inlining everything
-  into one file to game the count, and not moving logic into a `.json` blob. If a task genuinely
-  cannot fit, park and say what would have to give.
+  under 650 **lines of code** — blank lines and comments do not count, because `CONTEXT.md`
+  requires comments on the non-obvious and a budget that counted them would punish the
+  explanation rather than the code. `codeLines()` in `tests/unit/budget.test.js` is the
+  definition and is itself unit-tested so it cannot drift.
+
+  It was raw lines until T-06, which hit 667 raw against 650 and parked. The projection for the
+  finished piece is roughly 520 code lines, so there is real headroom — but when the fix is
+  consolidation, consolidate. Do not delete tests, inline everything into one file, or move
+  logic into a `.json` blob to game the count. If a task genuinely cannot fit, park and say what
+  would have to give.
 
 - **Two source documents, and they conflict.** The written brief governs behaviour; the design
   file governs appearance. The PRD's Implementation Decisions section has the full resolution

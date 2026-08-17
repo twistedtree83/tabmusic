@@ -199,9 +199,14 @@ inlined by `vite-plugin-singlefile`, no asset fetches. Google Fonts remain a `<l
 a typography dependency, not an app asset, and the piece degrades to the fallback stack without
 it.
 
-**Line budget** — source JavaScript under `src/` (excluding tests) must stay under **650
-lines**. A test in the gate asserts this. If the budget is tight, the abstraction is wrong —
-consolidate, do not delete tests or inline everything into one file to game the count.
+**Line budget** — source JavaScript under `src/` (excluding tests) must stay under **650 lines
+of code**. Blank lines and comments do not count: this document requires comments on the
+non-obvious, and a budget that counted them would be punishing the explanation rather than the
+code. A test in the gate asserts it, and `codeLines()` — the function that does the counting —
+is itself unit-tested so the definition cannot drift.
+
+If the budget is tight, the abstraction is wrong — consolidate. Do not delete tests, inline
+everything into one file, or move logic into a `.json` blob to game the count.
 
 **Test hook** — `window.__tabchoir`, a small read-only object exposing roster, role, frequency,
 context state and voice count. It exists so Playwright can assert behaviour that is otherwise

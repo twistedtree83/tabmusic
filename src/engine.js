@@ -1,3 +1,5 @@
+import { gain, lowpass } from './nodes.js';
+
 export const REVERB_SECONDS = 3.5;
 const REVERB_DECAY = 3.2;
 const REVERB_TONE_HZ = 2600;
@@ -42,11 +44,7 @@ export function renderImpulse(sampleRate) {
   const source = offline.createBufferSource();
   source.buffer = decayingNoise(offline, REVERB_SECONDS);
 
-  const tone = offline.createBiquadFilter();
-  tone.type = 'lowpass';
-  tone.frequency.value = REVERB_TONE_HZ;
-
-  source.connect(tone).connect(offline.destination);
+  source.connect(lowpass(offline, REVERB_TONE_HZ)).connect(offline.destination);
   source.start();
   return offline.startRendering();
 }
@@ -64,23 +62,19 @@ export function startEngine() {
   const ctx = new Ctx();
   ctx.resume();
 
-  const bus = ctx.createGain();
-  bus.gain.value = 0.9;
+  const bus = gain(ctx, 0.9);
 
   const analyser = ctx.createAnalyser();
   analyser.fftSize = 2048;
   analyser.smoothingTimeConstant = 0.85;
 
   const reverb = ctx.createConvolver();
-  const wet = ctx.createGain();
-  wet.gain.value = 0.55;
+  const wet = gain(ctx, 0.55);
 
   const delay = ctx.createDelay(2);
   delay.delayTime.value = ECHO_SECONDS;
-  const feedback = ctx.createGain();
-  feedback.gain.value = 0.48;
-  const echo = ctx.createGain();
-  echo.gain.value = 0.22;
+  const feedback = gain(ctx, 0.48);
+  const echo = gain(ctx, 0.22);
 
   // Everything taps the bus in parallel; nothing sits in series with the dry
   // path, so a voice is never coloured by the room on its way to the speakers.
