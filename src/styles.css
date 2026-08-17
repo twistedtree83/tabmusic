@@ -173,16 +173,6 @@ body {
   height: 100%;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .gate {
-    animation: none;
-  }
-
-  .join,
-  .hint {
-    transition: none;
-  }
-}
 
 .overlay {
   position: fixed;
@@ -244,14 +234,63 @@ body {
   text-wrap: pretty;
 }
 
-.status {
+.aside {
   grid-row: 3;
   grid-column: 2;
   align-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 18px;
+}
+
+.another {
+  cursor: pointer;
+  padding-bottom: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--amber);
+  border-bottom: 1px solid rgba(184, 135, 63, 0.5);
+  transition:
+    color 600ms ease,
+    border-color 600ms ease,
+    letter-spacing 800ms ease;
+}
+
+.another:hover,
+.another:focus-visible {
+  color: var(--amber-lit);
+  border-bottom-color: var(--amber-lit);
+  letter-spacing: 0.36em;
+}
+
+.another:focus-visible {
+  outline: 1px solid rgba(224, 171, 92, 0.6);
+  outline-offset: 8px;
+}
+
+.status {
   font-family: var(--mono);
   font-size: 11px;
   letter-spacing: 0.16em;
   text-align: right;
   white-space: nowrap;
   color: rgba(245, 245, 244, 0.28);
+}
+
+/* Last in the file on purpose: a media query adds no specificity, so these
+   have to come after the rules they switch off. */
+@media (prefers-reduced-motion: reduce) {
+  .gate {
+    animation: none;
+  }
+
+  .join,
+  .another,
+  .hint {
+    transition: none;
+  }
 }

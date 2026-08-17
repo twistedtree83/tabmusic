@@ -180,6 +180,17 @@
       "importance": 15,
       "afk": true,
       "passes": true
+    },
+    {
+      "id": "T-17",
+      "issue": 17,
+      "title": "A way to add a voice from inside the piece",
+      "depends": [
+        "T-10"
+      ],
+      "importance": 16,
+      "afk": true,
+      "passes": false
     }
   ]
 }

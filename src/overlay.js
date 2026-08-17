@@ -15,7 +15,10 @@ const MARKUP = `
     <p class="readout-count"></p>
   </div>
   <p class="hint"></p>
-  <p class="status">window position sets pitch</p>`;
+  <div class="aside">
+    <span class="another" role="button" tabindex="0">Open another window</span>
+    <p class="status">window position sets pitch</p>
+  </div>`;
 
 /**
  * The typographic layer above the stage. Real DOM rather than canvas text, so
@@ -37,6 +40,25 @@ export function renderOverlay(root) {
   const count = part('.readout-count');
   const hint = part('.hint');
   const status = part('.status');
+
+  // A window rather than a tab: window.open only opens a window when it is
+  // given features, and a tab shares its parent's screenX — a voice that can
+  // never be moved off its parent's degree is not one you can play. Offset so
+  // the new window does not land exactly on top of this one.
+  const another = part('.another');
+  const open = () => {
+    const width = Math.round(window.outerWidth * 0.8);
+    const height = Math.round(window.outerHeight * 0.8);
+    const left = window.screenX + 60;
+    const top = window.screenY + 60;
+    window.open(location.href, '_blank', `width=${width},height=${height},left=${left},top=${top}`);
+  };
+  another.addEventListener('click', open);
+  another.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    open();
+  });
 
   // Whether this window has ever had company. In memory only: no storage, no
   // URL state. A reloaded window is a new window and starts the piece again.
