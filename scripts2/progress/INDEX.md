@@ -24,4 +24,4 @@ check after: **T-03** (peer layer), **T-07** (audio), **T-10** (canvas and typog
 - [x] **T-15** #15 — Backgrounded window: pause rendering, keep the heartbeat (needs T-03, T-08)
 - [x] **T-14** #14 — Reduced motion (needs T-09)
 - [x] **T-16** #16 — README, single-file deploy, and the budget sign-off (needs T-11, T-12, T-13, T-14, T-15) — *stage 4*
-- [ ] **T-17** #17 — A way to add a voice from inside the piece (needs T-10)
+- [x] **T-17** #17 — A way to add a voice from inside the piece (needs T-10)
