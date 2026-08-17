@@ -134,7 +134,9 @@ test.describe('the chord', () => {
     expect(state.role).toBe('bass');
     expect(state.voices).toBe(1);
     expect(state.hz).toBeGreaterThan(0);
-    expect(state.impulseSeconds).toBeCloseTo(3.5, 1);
+
+    // The room is rendered offline and lands a moment after the voice does.
+    await expect.poll(async () => (await hook(alone)).impulseSeconds, SETTLE).toBeCloseTo(3.5, 1);
     await expect.poll(async () => (await hook(alone)).level > 0.08, SETTLE).toBe(true);
   });
 });
