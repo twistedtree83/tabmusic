@@ -1,5 +1,7 @@
 const ALONE = 'You are one voice. Open this page in another window.';
 const MOVE = 'Now move your windows.';
+const LISTENING =
+  'The chord is full. This window listens, and will sing when another one closes.';
 const FADE_MS = 1600;
 const LINGER_MS = 9000;
 
@@ -18,7 +20,7 @@ const MARKUP = `
  * it can be selected and read aloud.
  *
  * @param {HTMLElement} root
- * @returns {(state: { role: string, hz: number, voices: number }) => void}
+ * @returns {(state: { role: string, hz: number, voices: number, listening: boolean }) => void}
  */
 export function renderOverlay(root) {
   const overlay = document.createElement('section');
@@ -32,39 +34,52 @@ export function renderOverlay(root) {
   const freq = part('.readout-freq');
   const count = part('.readout-count');
   const hint = part('.hint');
+  const status = part('.status');
 
   // Whether this window has ever had company. In memory only: no storage, no
   // URL state. A reloaded window is a new window and starts the piece again.
   let seenPeer = false;
   let lingering = false;
+  let retired = false;
 
-  /** @param {string} line */
-  function say(line) {
-    if (hint.textContent === line) return;
+  /**
+   * @param {string} line
+   * @param {boolean} visible a retired hint stays gone, but a listener is owed
+   *   an explanation whether or not the nudges have had their turn
+   */
+  function say(line, visible) {
+    const show = visible ? '1' : '0';
+    if (hint.textContent === line) {
+      hint.style.opacity = show;
+      return;
+    }
     if (!hint.textContent) {
       hint.textContent = line;
-      hint.style.opacity = '1';
+      hint.style.opacity = show;
       return;
     }
     // Out, then in — the line is replaced rather than swapped under the reader.
     hint.style.opacity = '0';
     setTimeout(() => {
       hint.textContent = line;
-      hint.style.opacity = '1';
+      hint.style.opacity = show;
     }, FADE_MS);
   }
 
   return (state) => {
-    role.textContent = state.role;
+    role.textContent = state.listening ? 'Listening' : state.role;
     freq.textContent = state.hz ? `${state.hz.toFixed(1)} Hz` : '—';
     count.textContent = state.voices === 1 ? '1 voice' : `${state.voices} voices`;
+    status.textContent = state.listening ? 'silent' : 'window position sets pitch';
 
     if (state.voices > 1) seenPeer = true;
-    say(seenPeer ? MOVE : ALONE);
+    if (state.listening) say(LISTENING, true);
+    else say(seenPeer ? MOVE : ALONE, !retired);
 
-    if (seenPeer && !lingering) {
+    if (seenPeer && !state.listening && !lingering) {
       lingering = true;
       setTimeout(() => {
+        retired = true;
         hint.style.opacity = '0';
       }, FADE_MS + LINGER_MS);
     }

@@ -75,10 +75,12 @@ else renderGate(document.body, () => {
       voice = null;
     }
 
+    const seat = roster.find((entry) => entry.id === selfId);
     showState({
-      role: roster.find((seat) => seat.id === selfId)?.role ?? '',
+      role: seat?.role ?? '',
       hz: midi ? midiToHz(midi) : 0,
       voices: roster.length,
+      listening: seat?.role === LISTENER,
     });
   }
 
