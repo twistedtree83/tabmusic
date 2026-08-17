@@ -179,7 +179,7 @@
       ],
       "importance": 15,
       "afk": true,
-      "passes": false
+      "passes": true
     }
   ]
 }
