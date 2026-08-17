@@ -19,7 +19,7 @@ check after: **T-03** (peer layer), **T-07** (audio), **T-10** (canvas and typog
 - [x] **T-09** #9 — Stage canvas: sibling rules, drift, and departing ghosts (needs T-08)
 - [x] **T-10** #10 — Overlay typography: title, role, frequency, voice count (needs T-08) — *stage 3*
 - [x] **T-13** #13 — Narrow screen: the honest explanation (needs T-02)
-- [ ] **T-11** #11 — The hint: a one-way copy state machine (needs T-10)
+- [x] **T-11** #11 — The hint: a one-way copy state machine (needs T-10)
 - [ ] **T-12** #12 — Listener state, stated plainly (needs T-07, T-10)
 - [ ] **T-15** #15 — Backgrounded window: pause rendering, keep the heartbeat (needs T-03, T-08)
 - [ ] **T-14** #14 — Reduced motion (needs T-09)
