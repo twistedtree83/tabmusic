@@ -4,6 +4,7 @@ import { startEngine } from './engine.js';
 import { onFrame } from './frame.js';
 import { exposeHook } from './hook.js';
 import { isNarrow, renderNarrow } from './narrow.js';
+import { renderOverlay } from './overlay.js';
 import { joinChoir } from './presence.js';
 import { LISTENER } from './roster.js';
 import { renderStage } from './stage.js';
@@ -36,6 +37,8 @@ else renderGate(document.body, () => {
       .filter((seat) => seat.id !== selfId && seat.role !== LISTENER && seat.hz > 0)
       .map((seat) => ({ id: seat.id, hz: seat.hz })),
   );
+
+  const showState = renderOverlay(document.body);
 
   const choir = joinChoir((next, id) => {
     roster = next;
@@ -71,6 +74,12 @@ else renderGate(document.body, () => {
       voice.dispose();
       voice = null;
     }
+
+    showState({
+      role: roster.find((seat) => seat.id === selfId)?.role ?? '',
+      hz: midi ? midiToHz(midi) : 0,
+      voices: roster.length,
+    });
   }
 
   exposeHook(() => ({

@@ -182,3 +182,73 @@ body {
     transition: none;
   }
 }
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  padding: 7vh 7vw;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  align-items: start;
+  gap: 40px;
+  /* Transparent to the canvas underneath, except where there is text to select. */
+  pointer-events: none;
+}
+
+.overlay > * {
+  margin: 0;
+  pointer-events: auto;
+}
+
+.mark {
+  font-size: 15px;
+  font-weight: 300;
+  letter-spacing: 0.44em;
+  text-transform: uppercase;
+  color: rgba(245, 245, 244, 0.55);
+  white-space: nowrap;
+}
+
+.readout {
+  font-family: var(--mono);
+  font-size: 11px;
+  line-height: 2.1;
+  letter-spacing: 0.14em;
+  text-align: right;
+  color: rgba(245, 245, 244, 0.45);
+  pointer-events: auto;
+}
+
+.readout p {
+  margin: 0;
+}
+
+.readout-role {
+  color: var(--amber);
+  text-transform: capitalize;
+}
+
+.hint {
+  grid-row: 3;
+  grid-column: 1;
+  align-self: end;
+  max-width: 44ch;
+  font-size: clamp(18px, 1.7vw, 23px);
+  font-weight: 300;
+  font-style: italic;
+  color: rgba(245, 245, 244, 0.6);
+  text-wrap: pretty;
+}
+
+.status {
+  grid-row: 3;
+  grid-column: 2;
+  align-self: end;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-align: right;
+  white-space: nowrap;
+  color: rgba(245, 245, 244, 0.28);
+}
