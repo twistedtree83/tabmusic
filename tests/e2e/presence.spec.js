@@ -41,7 +41,8 @@ test.describe('presence', () => {
     const selves = await Promise.all(pages.map(selfId));
     expect(new Set(selves).size).toBe(3);
     for (const page of pages) {
-      expect((await readRoster(page)).filter((r) => r.self)).toHaveLength(1);
+      const mine = await selfId(page);
+      expect((await readRoster(page)).filter((r) => r.id === mine)).toHaveLength(1);
     }
   });
 
@@ -79,7 +80,7 @@ test.describe('presence', () => {
 
     await idle.waitForTimeout(1500);
     expect(await rosterSize(singing)).toBe(1);
-    await expect(idle.locator('.roster-dump')).toHaveCount(0);
+    await expect(idle.locator('canvas.stage')).toHaveCount(0);
 
     // ...and joins the moment it does.
     await lendVoice(idle);

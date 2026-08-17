@@ -6,6 +6,7 @@ import { exposeHook } from './hook.js';
 import { isNarrow, renderNarrow } from './narrow.js';
 import { joinChoir } from './presence.js';
 import { LISTENER } from './roster.js';
+import { renderStage } from './stage.js';
 import { chordPitch, midiToHz, normalisePosition, roleOctave, ROLE_ROOTS } from './theory.js';
 import { Voice, oscillatorCount, voiceCount } from './voice.js';
 
@@ -13,38 +14,13 @@ import { Voice, oscillatorCount, voiceCount } from './voice.js';
 // hearing goes on the channel, which keeps it quiet while a window is dragged.
 const MOVE_PX = 4;
 
-/**
- * The peer layer, laid bare. The stage replaces this at T-08.
- * @param {import('./roster.js').Seat[]} roster
- * @param {string} selfId
- * @param {{ t: number, degree: number, midi: number }} here
- */
-function describe(roster, selfId, here) {
-  const voices = roster.length === 1 ? '1 voice' : `${roster.length} voices`;
-  const hz = here.midi ? `${midiToHz(here.midi).toFixed(1)} Hz` : '—';
-  const rows = roster.map((seat) => {
-    const pitch = seat.hz ? `${seat.hz.toFixed(1)}Hz` : '—Hz';
-    return (
-      `#${seat.rank}  ${seat.role.padEnd(9)}${pitch.padStart(9)}  ` +
-      `joined=${seat.joinedAt}  id=${seat.id}${seat.id === selfId ? '  self' : ''}`
-    );
-  });
-  return [
-    `tab choir · ${voices}`,
-    `position t=${here.t.toFixed(4)}  degree=${here.degree}  midi=${here.midi || '—'}  ${hz}`,
-    ...rows,
-  ].join('\n');
-}
-
 if (isNarrow()) renderNarrow(document.body);
 else renderGate(document.body, () => {
   // Built first and synchronously: the context and its resume() have to happen
   // inside the gesture that asked for them, or the autoplay policy suspends it.
   const engine = startEngine();
 
-  const dump = document.createElement('pre');
-  dump.className = 'roster-dump';
-  document.body.append(dump);
+  renderStage(document.body, engine.analyser);
 
   /** @type {import('./roster.js').Seat[]} */
   let roster = [];
@@ -91,8 +67,6 @@ else renderGate(document.body, () => {
       voice.dispose();
       voice = null;
     }
-
-    dump.textContent = describe(roster, selfId, { t, degree: degree(), midi });
   }
 
   exposeHook(() => ({
@@ -105,6 +79,11 @@ else renderGate(document.body, () => {
     role: roster.find((seat) => seat.id === selfId)?.role ?? '',
     hz: midi ? midiToHz(midi) : 0,
     voices: roster.length,
+    selfId,
+    t,
+    degree: degree(),
+    midi,
+    roster: roster.map((seat) => ({ id: seat.id, rank: seat.rank, role: seat.role, hz: seat.hz })),
   }));
 
   onFrame(() => {

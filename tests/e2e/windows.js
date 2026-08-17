@@ -1,11 +1,15 @@
 /**
  * @typedef {import('@playwright/test').BrowserContext} BrowserContext
  * @typedef {import('@playwright/test').Page} Page
- * @typedef {{ rank: number, role: string, hz: number, joinedAt: number, id: string, self: boolean }} Row
+ * @typedef {{ id: string, rank: number, role: string, hz: number }} Row
  */
 
-const ROW = /^#(\d+)\s+(\S+)\s+(\S+)Hz\s+joined=(\d+)\s+id=(\S+?)(\s+self)?$/gm;
-const HERE = /^position t=([\d.]+)\s+degree=(-?\d+)\s+midi=(\S+)\s+(\S+)/m;
+/**
+ * Everything the piece will admit to. Until T-08 this came from a `<pre>` dump;
+ * the stage replaced it, and `window.__tabchoir` is now the only window in.
+ * @param {Page} page
+ */
+export const hook = (page) => page.evaluate(() => /** @type {any} */ (window).__tabchoir);
 
 /**
  * Open n windows on the piece, all in the test's own browser context.
@@ -45,24 +49,16 @@ export async function openVoices(context, n) {
 /** @param {Page} page */
 export async function lendVoice(page) {
   await page.getByRole('button', { name: 'Lend a voice' }).click();
-  await page.locator('.roster-dump').waitFor({ timeout: 5000 });
+  await page.locator('canvas.stage').waitFor({ timeout: 5000 });
 }
 
 /**
- * Parse the roster dump this window is showing.
+ * The roster this window has derived.
  * @param {Page} page
  * @returns {Promise<Row[]>}
  */
 export async function readRoster(page) {
-  const text = await page.locator('.roster-dump').innerText();
-  return [...text.matchAll(ROW)].map((m) => ({
-    rank: Number(m[1]),
-    role: m[2],
-    hz: m[3] === '—' ? 0 : Number(m[3]),
-    joinedAt: Number(m[4]),
-    id: m[5],
-    self: Boolean(m[6]),
-  }));
+  return (await hook(page))?.roster ?? [];
 }
 
 /** @param {Page} page */
@@ -72,14 +68,12 @@ export async function rosterSize(page) {
 
 /** @param {Page} page */
 export async function selfId(page) {
-  const row = (await readRoster(page)).find((r) => r.self);
-  return row?.id;
+  return (await hook(page))?.selfId;
 }
 
 /** @param {Page} page */
 export async function ownRole(page) {
-  const row = (await readRoster(page)).find((r) => r.self);
-  return row?.role;
+  return (await hook(page))?.role;
 }
 
 /**
@@ -88,13 +82,7 @@ export async function ownRole(page) {
  * @returns {Promise<{ t: number, degree: number, midi: number, hz: number }>}
  */
 export async function readPosition(page) {
-  const text = await page.locator('.roster-dump').innerText();
-  const m = text.match(HERE);
-  if (!m) throw new Error(`no position line in dump:\n${text}`);
-  return {
-    t: Number(m[1]),
-    degree: Number(m[2]),
-    midi: m[3] === '—' ? 0 : Number(m[3]),
-    hz: m[4] === '—' ? 0 : Number(m[4]),
-  };
+  const state = await hook(page);
+  if (!state) throw new Error('this window has not lent a voice yet');
+  return { t: state.t, degree: state.degree, midi: state.midi, hz: state.hz };
 }

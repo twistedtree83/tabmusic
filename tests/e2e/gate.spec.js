@@ -16,7 +16,6 @@ test.describe('the gate', () => {
 
     // Nothing of the stage may exist before the gesture.
     await expect(page.locator('canvas')).toHaveCount(0);
-    await expect(page.locator('.readout')).toHaveCount(0);
   });
 
   test('speaks of windows, never of tabs', async ({ page }) => {

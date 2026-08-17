@@ -90,6 +90,11 @@ export function startEngine() {
     reverb.buffer = impulse;
   });
 
+  // A browser allows only a handful of audio contexts at once, so a window that
+  // is going away has to hand its one back. pagehide rather than
+  // visibilitychange: a backgrounded window must keep singing.
+  addEventListener('pagehide', () => ctx.close(), { once: true });
+
   return {
     ctx,
     bus,
