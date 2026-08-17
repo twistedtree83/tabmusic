@@ -230,6 +230,8 @@ body {
 }
 
 .hint {
+  opacity: 0;
+  transition: opacity 1600ms ease;
   grid-row: 3;
   grid-column: 1;
   align-self: end;
